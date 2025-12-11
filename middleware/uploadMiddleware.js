@@ -3,7 +3,13 @@ import { v2 as cloudinary } from "cloudinary";
 import streamifier from "streamifier";
 
 // multer menggunakan memory storage (file disimpan di buffer)
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // fungsi helper untuk upload ke cloudinary
 export const uploadToCloudinary = (file, folderName = "jobportal") => {
