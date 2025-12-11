@@ -1,16 +1,17 @@
 import multer from "multer";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import cloudinary from "../config/cloudinary.js";
 
-// konfigurasi penyimpanan file
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/"); // folder penyimpanan file
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname); // nama file yang disimpan
+// konfigurasi storage cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "jobportal", // folder di Cloudinary
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
   },
 });
 
-// file filter untuk menerima hanya file gambar
+// filter khusus file gambar
 const fileFilter = (req, file, cb) => {
   const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
   if (allowedTypes.includes(file.mimetype)) {
