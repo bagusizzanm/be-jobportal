@@ -1,36 +1,26 @@
 import multer from "multer";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
-import cloudinary from "../config/cloudinary.js";
+import { v2 as cloudinary } from "cloudinary";
+import streamifier from "streamifier";
 
-// konfigurasi storage cloudinary
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: (req, file) => {
-    const folderPath = `${folderName.trim()}`;
-    const fileExtension = path.extname(file.originalname).substring(1);
-    const publicId = `${file.fieldname}-${Date.now()}`;
+// multer menggunakan memory storage (file disimpan di buffer)
+const upload = multer({ storage: multer.memoryStorage() });
 
-    return {
-      folder: folderPath,
-      public_id: publicId,
-      format: fileExtension,
-    };
-  },
-});
-
-// filter khusus file gambar
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-  if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(
-      new Error("Invalid file type. Only JPEG, PNG, and WEBP are allowed."),
-      false
+// fungsi helper untuk upload ke cloudinary
+export const uploadToCloudinary = (file, folderName = "jobportal") => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: folderName,
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
     );
-  }
-};
 
-const upload = multer({ storage, fileFilter });
+    // convert buffer → stream → kirim ke Cloudinary
+    streamifier.createReadStream(file.buffer).pipe(uploadStream);
+  });
+};
 
 export default upload;
