@@ -6,7 +6,7 @@ import {
 } from "../controller/authController.js";
 import { v2 as cloudinary } from "cloudinary";
 import { protect } from "../middleware/authMiddleware.js";
-import upload from "../middleware/uploadMiddleware.js";
+import upload, { uploadToCloudinary } from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
@@ -24,21 +24,23 @@ router.get("/user-profile", protect, userProfile);
 //   res.status(200).json({ imageUrl });
 // });
 
-router.post("/upload-image", upload.single("image"), async (req, res) => {
-  if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+outer.post("/upload-image", upload.single("image"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
 
-  const result = await new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      { folder: "jobportal" },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
-      }
-    );
-    streamifier.createReadStream(req.file.buffer).pipe(stream);
-  });
+    // Upload ke Cloudinary
+    const result = await uploadToCloudinary(req.file, "profile");
 
-  res.json({ imageUrl: result.secure_url });
+    return res.status(200).json({
+      imageUrl: result.secure_url,
+      publicId: result.public_id,
+    });
+  } catch (error) {
+    console.error("Cloudinary upload error:", error);
+    return res.status(500).json({ message: "Upload failed", error });
+  }
 });
 
 export default router;
