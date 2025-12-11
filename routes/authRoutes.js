@@ -24,7 +24,7 @@ router.get("/user-profile", protect, userProfile);
 //   res.status(200).json({ imageUrl });
 // });
 
-outer.post("/upload-image", upload.single("image"), async (req, res) => {
+router.post("/upload-image", upload.single("image"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
