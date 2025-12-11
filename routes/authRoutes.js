@@ -4,7 +4,7 @@ import {
   loginUser,
   userProfile,
 } from "../controller/authController.js";
-
+import { v2 as cloudinary } from "cloudinary";
 import { protect } from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadMiddleware.js";
 
